@@ -11,6 +11,8 @@
 
 #include "buffer/replacer.h"
 #include "hash/extendible_hash.h"
+#include <list>
+#include <mutex>
 
 namespace cmudb {
 
@@ -31,6 +33,8 @@ public:
 
 private:
   // add your member variables here
+  std::list<T> vec_;
+  mutable std::mutex mtx_;
 };
 
 } // namespace cmudb
