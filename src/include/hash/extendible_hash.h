@@ -12,6 +12,9 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <map>
+#include <functional>
+#include <mutex>
 
 #include "hash/hash_table.h"
 
@@ -35,5 +38,18 @@ public:
 
 private:
   // add your own member variables here
+  void Split(int dirIndex);
+  
+  std::vector<int> Dir;
+  int dirSize;
+  int I;
+
+  const size_t bucketSize;
+  std::vector<int> J;
+  std::vector<std::map<K, V> > buckets;
+
+  mutable std::mutex hashMtx;
+
+  void InsertAux(const K &key, const V &value);
 };
 } // namespace cmudb
