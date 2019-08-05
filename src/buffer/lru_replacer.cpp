@@ -18,7 +18,7 @@ template <typename T> LRUReplacer<T>::~LRUReplacer() {}
  * Insert value into LRU
  */
 template <typename T> void LRUReplacer<T>::Insert(const T &value) {
-	//std::lock_guard<std::mutex> lck (mtx_);
+	std::lock_guard<std::mutex> lck (mtx_);
 	for (auto iter = vec_.begin(); iter != vec_.end(); ++iter) {
 		if (*iter == value) {
 			vec_.erase(iter);
@@ -34,7 +34,7 @@ template <typename T> void LRUReplacer<T>::Insert(const T &value) {
  * return true. If LRU is empty, return false
  */
 template <typename T> bool LRUReplacer<T>::Victim(T &value) {
-	//std::lock_guard<std::mutex> lck (mtx_);
+	std::lock_guard<std::mutex> lck (mtx_);
 	LOG_INFO("Victim");
 	if (vec_.empty()) {
 		return false;
@@ -51,7 +51,7 @@ template <typename T> bool LRUReplacer<T>::Victim(T &value) {
  * return false
  */
 template <typename T> bool LRUReplacer<T>::Erase(const T &value) {
-	//std::lock_guard<std::mutex> lck (mtx_);
+	std::lock_guard<std::mutex> lck (mtx_);
 	LOG_INFO("Erase");
 	for (auto iter = vec_.begin(); iter != vec_.end(); ++iter) {
 		if (*iter == value) {
@@ -63,7 +63,7 @@ template <typename T> bool LRUReplacer<T>::Erase(const T &value) {
 }
 
 template <typename T> size_t LRUReplacer<T>::Size() { 
-	//std::lock_guard<std::mutex> lck (mtx_);
+	std::lock_guard<std::mutex> lck (mtx_);
 	LOG_INFO("Size");
 	return vec_.size(); 
 }
