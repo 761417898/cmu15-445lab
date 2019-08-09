@@ -145,14 +145,13 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveHalfTo(
   //更新父节点信息
   for (int idx = GetSize() - half; idx < GetSize(); ++idx) {
     auto temp_page = buffer_pool_manager->FetchPage(array[idx].second);
-    auto child_page = reinterpret_cast<BPlusTreeInternalPage*>(temp_page->GetData());
+    auto child_page = reinterpret_cast<BPlusTreePage*>(temp_page->GetData());
     child_page->SetParentPageId(recipient->GetPageId());
     buffer_pool_manager->UnpinPage(array[idx].second, true);
   }
   IncreaseSize(-1 * half);
 }
 
-//第一个kv对还未补充，缺第一个v的信息
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyHalfFrom(
     MappingType *items, int size, BufferPoolManager *buffer_pool_manager) {
@@ -160,7 +159,7 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyHalfFrom(
     array[idx] = *items;
     ++items;
   }
-  IncreaseSize(size - 1);
+  IncreaseSize(size-1);
 }
 
 /*****************************************************************************

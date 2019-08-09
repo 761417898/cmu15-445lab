@@ -70,11 +70,11 @@ bool ExtendibleHash<K, V>::Find(const K &key, V &value) {
   int bucketIndex = Dir[dirIndex];
   auto iter = buckets[bucketIndex].find(key);
   if (iter == buckets[bucketIndex].end()) {
-  	LOG_INFO("Unfind");
+  	//LOG_INFO("Unfind");
   	return false;
   } else {
   	value = iter->second;
-  	LOG_INFO("%d bucket Find", bucketIndex);
+  	//LOG_INFO("%d bucket Find", bucketIndex);
   	return true;
   }
 }
@@ -94,7 +94,7 @@ bool ExtendibleHash<K, V>::Remove(const K &key) {
 template <typename K, typename V>
 void ExtendibleHash<K, V>::Split(int dirIndex) {
 //	std::lock_guard<std::mutex> lck (hashMtx);
-	LOG_INFO("bucket Split");
+	//LOG_INFO("bucket Split");
 	int bucketIndex = Dir[dirIndex];
 	if (J[bucketIndex] == I) {
 		buckets.push_back(std::map<K, V>());
@@ -133,7 +133,7 @@ void ExtendibleHash<K, V>::InsertAux(const K &key, const V &value) {
 		bucketIndex = Dir[dirIndex];
 	}
 	buckets[bucketIndex].insert(std::make_pair(key, value));
-	LOG_INFO("%d bucket Insert", bucketIndex);
+	//LOG_INFO("%d bucket Insert", bucketIndex);
 }
 
 /*

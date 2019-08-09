@@ -50,7 +50,7 @@ BufferPoolManager::~BufferPoolManager() {
 Page *BufferPoolManager::FetchPage(page_id_t page_id) {
   std::lock_guard<std::mutex> lck (latch_);
   if (page_id == INVALID_PAGE_ID) {
-    LOG_INFO("INVALID_PAGE_ID");
+    //LOG_INFO("INVALID_PAGE_ID");
     return nullptr;
   }
   Page* ret_page = nullptr;
@@ -67,8 +67,9 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
   } else {
     //1.2 lru
     if (replacer_->Victim(ret_page)) {
+      //LOG_INFO("Victim SUCCESS");
       if (ret_page->GetPinCount() != 0) {
-        LOG_INFO("Page needed to be replaced is pinned");
+        //LOG_INFO("Page needed to be replaced is pinned");
         return nullptr;
       }
       if (ret_page->is_dirty_) {
@@ -77,6 +78,7 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
       }
       page_table_->Remove(ret_page->GetPageId());
     } else {
+      //LOG_INFO("Victim ERROR");
       return nullptr;
     }
   }
@@ -87,7 +89,7 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
   disk_manager_->ReadPage(ret_page->GetPageId(), ret_page->data_);
   ret_page->is_dirty_ = false;
   ret_page->pin_count_ = 1;
-  LOG_INFO("Fetch Page");
+  //LOG_INFO("Fetch Page");
   return ret_page; 
 }
 
@@ -107,11 +109,11 @@ bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
     return false;
   }
   page->pin_count_--;
-  if (page->pin_count_ == 0) {
+  if (page->pin_count_ <= 0) {
     replacer_->Insert(page);
   }
   page->is_dirty_ = is_dirty;
-  LOG_INFO("UnpinPage");
+  //LOG_INFO("UnpinPage");
   return true;
 }
 
@@ -124,13 +126,13 @@ bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
 bool BufferPoolManager::FlushPage(page_id_t page_id) {
   std::lock_guard<std::mutex> lck (latch_); 
   if (page_id == INVALID_PAGE_ID) {
-    LOG_INFO("INVALID_PAGE_ID");
+    //LOG_INFO("INVALID_PAGE_ID");
     return false;
   }
   Page *page;
   if (page_table_->Find(page_id, page)) {
     disk_manager_->WritePage(page->GetPageId(), page->GetData());
-    LOG_INFO("Flush Page");
+    //LOG_INFO("Flush Page");
     return true;
   } else {
     return false;
@@ -160,7 +162,7 @@ bool BufferPoolManager::DeletePage(page_id_t page_id) {
     free_list_->push_back(page);
   }
   disk_manager_->DeallocatePage(page_id);
-  LOG_INFO("Delete Page");
+  //LOG_INFO("Delete Page");
   return true; 
 }
 
