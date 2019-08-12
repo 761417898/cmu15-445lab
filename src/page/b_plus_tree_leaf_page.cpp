@@ -100,7 +100,7 @@ int B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key,
                                        const ValueType &value,
                                        const KeyComparator &comparator) {
   int idx = GetSize() - 1;
-  while (idx > 0 && (comparator(key, array[idx].first) < 0)) {
+  while (idx >= 0 && (comparator(key, array[idx].first) < 0)) {
     array[idx + 1] = array[idx];
     --idx;
   }

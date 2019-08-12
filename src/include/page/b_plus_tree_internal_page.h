@@ -54,6 +54,8 @@ public:
   void MoveLastToFrontOf(BPlusTreeInternalPage *recipient,
                          int parent_index,
                          BufferPoolManager *buffer_pool_manager);
+  void SetNextPageId(page_id_t);
+  page_id_t GetNextPageId();
   // DEUBG and PRINT
   std::string ToString(bool verbose) const;
   void QueueUpChildren(std::queue<BPlusTreePage *> *queue,

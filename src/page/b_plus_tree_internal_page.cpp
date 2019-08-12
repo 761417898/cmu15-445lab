@@ -329,6 +329,12 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(
  * DEBUG
  *****************************************************************************/
 INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetNextPageId(page_id_t) {}
+
+INDEX_TEMPLATE_ARGUMENTS
+page_id_t B_PLUS_TREE_INTERNAL_PAGE_TYPE::GetNextPageId() { return INVALID_PAGE_ID; }
+
+INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::QueueUpChildren(
     std::queue<BPlusTreePage *> *queue,
     BufferPoolManager *buffer_pool_manager) {
