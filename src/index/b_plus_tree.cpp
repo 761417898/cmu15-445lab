@@ -116,6 +116,7 @@ bool BPLUSTREE_TYPE::InsertIntoLeaf(const KeyType &key, const ValueType &value,
     } else {
       new_page->Insert(key, value, comparator_);
     }
+    new_page->SetNextPageId(leaf_page->GetNextPageId());
     leaf_page->SetNextPageId(new_page->GetPageId());
     InsertIntoParent(leaf_page, new_page->KeyAt(0), new_page);
     buffer_pool_manager_->UnpinPage(leaf_page->GetPageId(), true);
