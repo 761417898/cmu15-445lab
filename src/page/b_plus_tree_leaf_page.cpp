@@ -225,6 +225,8 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage *recipient,
                                            int, BufferPoolManager *) {
   recipient->CopyAllFrom(array, GetSize());
   recipient->SetNextPageId(GetNextPageId());
+  auto size = GetSize();
+  IncreaseSize(-size);
 }
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyAllFrom(MappingType *items, int size) {

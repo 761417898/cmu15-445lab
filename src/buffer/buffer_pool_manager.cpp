@@ -109,6 +109,7 @@ bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
     return false;
   }
   page->pin_count_--;
+//LOG_INFO("%d PinCount = %d", page_id, page->pin_count_);
   if (page->pin_count_ <= 0) {
     replacer_->Insert(page);
   }
