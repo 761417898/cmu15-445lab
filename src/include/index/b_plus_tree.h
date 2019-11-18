@@ -12,6 +12,7 @@
 
 #include <queue>
 #include <vector>
+#include <mutex>
 
 #include "concurrency/transaction.h"
 #include "index/index_iterator.h"
@@ -94,6 +95,8 @@ private:
   page_id_t root_page_id_;
   BufferPoolManager *buffer_pool_manager_;
   KeyComparator comparator_;
+
+  std::mutex mtx;
 };
 
 } // namespace cmudb

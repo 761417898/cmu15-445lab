@@ -42,12 +42,14 @@ bool BPLUSTREE_TYPE::GetValue(const KeyType &key,
   if (root_page_id_ == INVALID_PAGE_ID) {
     return false;
   }
+  mtx.lock();
   auto leaf_page = FindLeafPage(key, false);
   ValueType tmp_value;
   if (leaf_page->Lookup(key, tmp_value, comparator_)) {
     result.push_back(tmp_value);
   }
   buffer_pool_manager_->UnpinPage(leaf_page->GetPageId(), true);
+  mtx.unlock();
   return true;
 }
 
@@ -64,12 +66,15 @@ bool BPLUSTREE_TYPE::GetValue(const KeyType &key,
 INDEX_TEMPLATE_ARGUMENTS
 bool BPLUSTREE_TYPE::Insert(const KeyType &key, const ValueType &value,
                             Transaction *transaction) {
+  mtx.lock();
   if (IsEmpty()) {
     StartNewTree(key, value);
+    mtx.unlock();
     return true;
-  } else {
-    return InsertIntoLeaf(key, value, transaction);
   }
+  auto ret = InsertIntoLeaf(key, value, transaction);
+  mtx.unlock();
+  return ret;
 }
 /*
  * Insert constant key & value pair into an empty tree
@@ -210,10 +215,12 @@ void BPLUSTREE_TYPE::Remove(const KeyType &key, Transaction *transaction) {
   if (IsEmpty()) {
     return;
   }
+  mtx.lock();
   auto leaf_page = FindLeafPage(key, false);
   ValueType tmp_value;
   if (!leaf_page->Lookup(key, tmp_value, comparator_)) {
     buffer_pool_manager_->UnpinPage(leaf_page->GetPageId(), true);
+    mtx.unlock();
     //std::cout << "Unfind" << std::endl;
     return;
   }
@@ -221,6 +228,7 @@ void BPLUSTREE_TYPE::Remove(const KeyType &key, Transaction *transaction) {
   leaf_page->RemoveAndDeleteRecord(key, comparator_);
   CoalesceOrRedistribute(leaf_page, transaction);
   buffer_pool_manager_->UnpinPage(leaf_page->GetPageId(), true);
+  mtx.unlock();
 }
 
 /*
