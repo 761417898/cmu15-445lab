@@ -107,9 +107,10 @@ private:
   std::thread::id thread_id_;
   // transaction id
   txn_id_t txn_id_;
-  // Below are used by transaction, undo set
+  // Below are used by transaction,
+  //　undo set
   std::shared_ptr<std::deque<WriteRecord>> write_set_;
-  // prev lsn
+  // prev lsn当前执行过最新的日志记录
   lsn_t prev_lsn_;
 
   // Below are used by concurrent index

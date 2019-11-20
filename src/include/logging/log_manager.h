@@ -6,6 +6,7 @@
  */
 
 #pragma once
+
 #include <algorithm>
 #include <condition_variable>
 #include <future>
@@ -16,53 +17,75 @@
 
 namespace cmudb {
 
-class LogManager {
-public:
-  LogManager(DiskManager *disk_manager)
-      : next_lsn_(0), persistent_lsn_(INVALID_LSN),
-        disk_manager_(disk_manager) {
-    // TODO: you may intialize your own defined memeber variables here
-    log_buffer_ = new char[LOG_BUFFER_SIZE];
-    flush_buffer_ = new char[LOG_BUFFER_SIZE];
-  }
+    class LogManager {
+    public:
+        explicit LogManager(DiskManager *disk_manager)
+                : promise(nullptr), flush_lsn_(0), next_lsn_(0), persistent_lsn_(INVALID_LSN),
+                  offset_(0), disk_manager_(disk_manager) {
+            log_buffer_ = new char[LOG_BUFFER_SIZE];
+            flush_buffer_ = new char[LOG_BUFFER_SIZE];
+        }
 
-  ~LogManager() {
-    delete[] log_buffer_;
-    delete[] flush_buffer_;
-    log_buffer_ = nullptr;
-    flush_buffer_ = nullptr;
-  }
-  // spawn a separate thread to wake up periodically to flush
-  void RunFlushThread();
-  void StopFlushThread();
+        ~LogManager() {
+            delete[] log_buffer_;
+            delete[] flush_buffer_;
+            log_buffer_ = nullptr;
+            flush_buffer_ = nullptr;
+        }
 
-  // append a log record into log buffer
-  lsn_t AppendLogRecord(LogRecord &log_record);
+        // disable copy
+        LogManager(LogManager const &) = delete;
+        LogManager &operator=(LogManager const &) = delete;
 
-  // get/set helper functions
-  inline lsn_t GetPersistentLSN() { return persistent_lsn_; }
-  inline void SetPersistentLSN(lsn_t lsn) { persistent_lsn_ = lsn; }
-  inline char *GetLogBuffer() { return log_buffer_; }
+        // spawn a separate thread to wake up periodically to flush
+        void RunFlushThread();
+        void StopFlushThread();
 
-private:
-  // TODO: you may add your own member variables
-  // also remember to change constructor accordingly
+        // append a log record into log buffer
+        lsn_t AppendLogRecord(LogRecord &log_record);
 
-  // atomic counter, record the next log sequence number
-  std::atomic<lsn_t> next_lsn_;
-  // log records before & include persistent_lsn_ have been written to disk
-  std::atomic<lsn_t> persistent_lsn_;
-  // log buffer related
-  char *log_buffer_;
-  char *flush_buffer_;
-  // latch to protect shared member variables
-  std::mutex latch_;
-  // flush thread
-  std::thread *flush_thread_;
-  // for notifying flush thread
-  std::condition_variable cv_;
-  // disk manager
-  DiskManager *disk_manager_;
-};
+        // get/set helper functions
+        inline lsn_t GetPersistentLSN() { return persistent_lsn_; }
+        inline void SetPersistentLSN(lsn_t lsn) { persistent_lsn_ = lsn; }
+        inline char *GetLogBuffer() { return log_buffer_; }
+
+        inline std::promise<void> *GetPromise() { return promise; }
+        inline void SetPromise(std::promise<void> *p) { promise = p; }
+
+        void WakeupFlushThread(std::promise<void> *promise);
+
+    private:
+        inline void swapBuffer();
+
+        //用于日志刷新线程通知wake_up线程，日志已成功写入
+        std::promise<void> *promise;
+
+        // last log records in the flush_buffer_;
+        lsn_t flush_lsn_;
+
+        // atomic counter, record the next log sequence number
+        std::atomic<lsn_t> next_lsn_;
+
+        // log records before & include persistent_lsn_ have been written to disk
+        std::atomic<lsn_t> persistent_lsn_;
+
+        // log buffer related
+        char *log_buffer_;
+        char *flush_buffer_;
+
+        int offset_;
+
+        // latch to protect shared member variables
+        std::mutex latch_;
+
+        // flush thread
+        std::thread *flush_thread_;
+
+        // for notifying flush thread
+        std::condition_variable cv_;
+
+        // disk manager
+        DiskManager *disk_manager_;
+    };
 
 } // namespace cmudb

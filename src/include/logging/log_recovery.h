@@ -39,6 +39,7 @@ private:
   DiskManager *disk_manager_;
   BufferPoolManager *buffer_pool_manager_;
   // maintain active transactions and its corresponds latest lsn
+  //在redo中更新，方便在undo中快速定位每个事务最新的日志记录
   std::unordered_map<txn_id_t, lsn_t> active_txn_;
   // mapping log sequence number to log file offset, for undo purpose
   std::unordered_map<lsn_t, int> lsn_mapping_;

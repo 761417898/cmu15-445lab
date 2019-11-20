@@ -156,6 +156,7 @@ bool TableHeap::GetTuple(const RID &rid, Tuple &tuple, Transaction *txn) {
 
 bool TableHeap::DeleteTableHeap() {
   // todo: real delete
+  
   return true;
 }
 
