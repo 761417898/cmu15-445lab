@@ -1,63 +1,20 @@
-# 15-445 Database Systems
-# SQLite Project Source Code
+# 15-445 Database Systems Spring2017
 
-### Build
-```
-mkdir build
-cd build
-cmake ..
-make
-```
-Debug mode:
+项目整体框架的构建来自cmu15-445lab。
 
-```
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make
-```
+实现概述见项目概述
 
-### Testing
-```
-cd build
-make check
-```
+在lab搭建好整体框架的基础之上，基本实现了一个最简单的数据库后端存储，包括：
+整体表到缓冲区到文件的流程、B+树索引、日志读写的流程、事务（2PL+简化的arise）等
 
-### Run virtual table extension in SQLite
-Start SQLite with:
-```
-cd build
-./bin/sqlite3
-```
+一致性和隔离性的保证通过2PL来实现。
 
-In SQLite, load virtual table extension with:
+这里的B+树并发采用的是锁住全树的方式，虽然通过简单的蟹行协议可以提高并发性能，
+但这样做会提高很多事务处理的复杂度（写日志和日志恢复）。
 
-```
-.load ./lib/libvtable.dylib
-```
-or load `libvtable.so` (Linux), `libvtable.dll` (Windows)
+采用类似蟹行协议这种方式实现并发，事务原子性和持久性的保证要通过Arise算法来实现
 
-Create virtual table:  
-1.The first input parameter defines the virtual table schema. Please follow the format of (column_name [space] column_type) seperated by comma. We only support basic data types including INTEGER, BIGINT, SMALLINT, BOOLEAN, DECIMAL and VARCHAR.  
-2.The second parameter define the index schema. Please follow the format of (index_name [space] indexed_column_names) seperated by comma.
-```
-sqlite> CREATE VIRTUAL TABLE foo USING vtable('a int, b varchar(13)','foo_pk a')
-```
 
-After creating virtual table:  
-Type in any sql statements as you want.
-```
-sqlite> INSERT INTO foo values(1,'hello');
-sqlite> SELECT * FROM foo ORDER BY a;
-a           b         
-----------  ----------
-1           hello   
-```
-See [Run-Time Loadable Extensions](https://sqlite.org/loadext.html) and [CREATE VIRTUAL TABLE](https://sqlite.org/lang_createvtab.html) for further information.
 
-### Virtual table API
-https://sqlite.org/vtab.html
 
-### TODO
-* update: when size exceed that page, table heap returns false and delete/insert tuple (rid will change and need to delete/insert from index)
-* delete empty page from table heap when delete tuple
-* implement delete table, with empty page bitmap in disk manager (how to persistent?)
-* index: unique/dup key, variable key
+
